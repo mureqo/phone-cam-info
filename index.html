@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<title>Камеры флагманов</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --surface: #13161c;
+    --surface-container: #1a1f28;
+    --surface-container-high: #222833;
+    --surface-container-highest: #2a3140;
+    --outline: #3a4252;
+    --outline-variant: #262d3a;
+    --text: #e6e3dc;
+    --muted: #9aa0a6;
+    --primary: #d4a056;
+    --on-primary: #1a1206;
+    --secondary: #8fb3a8;
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 28px;
+    --elev-1: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --elev-2: 0 2px 6px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.35);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  #app { max-width: 580px; margin: 0 auto; padding: 20px 16px 28px; }
+  header { margin-bottom: 16px; }
+  h1 { font-size: 26px; font-weight: 400; letter-spacing: -0.01em; color: var(--text); margin: 0 0 4px; }
+  .author-line { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+  .search { width: 100%; padding: 14px 18px; border-radius: var(--radius-xl); border: 1px solid var(--outline); background: var(--surface-container); color: var(--text); font-size: 15px; margin: 14px 0 8px; outline: none; transition: border-color .2s, background .2s; box-shadow: var(--elev-1); }
+  .search:focus { border-color: var(--primary); background: var(--surface-container-high); }
+  .search::placeholder { color: var(--muted); }
+  .year-group { font-size: 13px; font-weight: 500; color: var(--primary); margin: 22px 0 8px; padding: 6px 12px; background: var(--surface-container); border-radius: var(--radius-sm); letter-spacing: 0.06em; text-transform: uppercase; display: inline-block; }
+  .phone-card { background: var(--surface-container); border: none; border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden; box-shadow: var(--elev-1); transition: box-shadow .18s, transform .12s; }
+  .phone-card:active { transform: scale(0.99); }
+  .phone-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; border-radius: var(--radius-lg); transition: background .15s; }
+  .phone-head:active { background: var(--surface-container-high); }
+  .phone-emoji { font-size: 20px; width: 28px; text-align: center; }
+  .phone-logo { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; }
+  .phone-name { flex: 1; font-size: 15px; font-weight: 500; line-height: 1.3; }
+  .phone-arrow { color: var(--muted); font-size: 14px; transition: transform .22s cubic-bezier(.2,.8,.2,1); }
+  .phone-card.open .phone-arrow { transform: rotate(90deg); color: var(--primary); }
+  .phone-details { display: none; padding: 0 16px 14px; }
+  .phone-card.open .phone-details { display: block; padding-top: 10px; animation: fadeIn .18s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .cam-block { background: var(--surface-container-high); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 10px; box-shadow: var(--elev-1); }
+  .cam-title { font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 8px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cam-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--outline-variant); }
+  .cam-row:last-child { border-bottom: none; }
+  .cam-key { color: var(--muted); }
+  .cam-val { font-weight: 500; color: var(--text); text-align: right; }
+  .footer { text-align: center; font-size: 11px; color: var(--muted); padding: 20px 0 4px; line-height: 1.6; }
+  .empty { text-align: center; color: var(--muted); padding: 32px 16px; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) {
+    .phone-card.open .phone-details { animation: none; }
+    .phone-arrow { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Камеры флагманов</h1>
+    <div class="author-line">2018–2026 · сенсоры · by mureqo, pablentov 2026©</div>
+  </header>
+  <input class="search" id="search" type="text" placeholder="Поиск телефона...">
+  <div id="list"></div>
+  <div class="footer">Нажми на телефон — раскроются сенсоры. ФР и мин. дистанция фокуса — приблизительные (≈). Пиксель/ФВЦ/ДД/рид-нойз для неосновных модулей рассчитаны по размеру сенсора (≈). Чипы — где известны (иначе «—»).<br>Данные могут быть неточны. Нашли ошибку? Telegram @ov48c</div>
+</div>
+
+<script>
+function sensorFmt(v) {
+  if (v === null || v === undefined) return '—';
+  if (v >= 1) return v + '"';
+  const r = 1 / v;
+  const s = r.toFixed(2).replace(/\.00$/, '');
+  return '1/' + s + '"';
+}
+
+function sensorInches(v) {
+  if (v === null || v === undefined) return null;
+  return v; // хранимое значение уже диагональ в дюймах
+}
+function pixelSizeUm(diag, mp) {
+  const d = sensorInches(diag);
+  if (!d || !mp) return null;
+  const diagMm = d * 25.4;
+  const areaMm2 = 0.48 * diagMm * diagMm;
+  const pxAreaMm2 = areaMm2 / (mp * 1e6);
+  const pxUm = Math.sqrt(pxAreaMm2) * 1000;
+  return pxUm.toFixed(2);
+}
+function fwcFromPx(px) {
+  if (!px) return null;
+  return Math.round(parseFloat(px) * 10000);
+}
+function estDR(px) {
+  if (!px) return null;
+  const p = parseFloat(px);
+  return (10 + p * 1.5).toFixed(1);
+}
+
+const PHONES = [
+  // 2020
+  { name: "Samsung Galaxy S20 Ultra", emoji: "📱", color: "#1a1a2e", year: 2020, mainCam: 108, mainAperture: "f/1.8", mainSensor: 1/1.33, mainPixel: 0.8, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.2, telephoto: 48, teleAperture: "f/3.5", teleSensor: 1/2.0, tele2: 48, tele2Aperture: "f/3.5", frontCam: 40, frontAperture: "f/2.2" },
+  { name: "iPhone 12 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2020, mainCam: 12, mainAperture: "f/1.6", mainSensor: 1/1.7, mainPixel: 1.7, mainDR: 13, ultrawide: 12, ultraAperture: "f/2.4", ultraSensor: 1/3.4, telephoto: 12, teleAperture: "f/2.2", teleSensor: 1/3.4, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/2.2" },
+  { name: "Xiaomi Mi 10 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2020, mainCam: 48, mainAperture: "f/1.85", mainSensor: 1/1.32, mainPixel: 1.2, mainDR: 13.5, ultrawide: 20, ultraAperture: "f/2.2", ultraSensor: 1/2.4, telephoto: 48, teleAperture: "f/3.4", teleSensor: 1/2.0, tele2: 48, tele2Aperture: "f/2.1", frontCam: 20, frontAperture: "f/2.0" },
+  { name: "Oppo Find X2 Pro", emoji: "🟢", color: "#0a2a1a", year: 2020, mainCam: 48, mainAperture: "f/1.7", mainSensor: 1/1.43, mainPixel: 1.1, mainDR: 13, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 13, teleAperture: "f/3.0", teleSensor: 1/3.4, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Vivo X50 Pro", emoji: "🔵", color: "#1a2a3a", year: 2020, mainCam: 48, mainAperture: "f/1.6", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13, ultrawide: 8, ultraAperture: "f/2.2", ultraSensor: 1/4.0, telephoto: 8, teleAperture: "f/3.4", teleSensor: 1/4.0, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Huawei P40 Pro", emoji: "🔴", color: "#2a0a0a", year: 2020, mainCam: 50, mainAperture: "f/1.9", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 13.5, ultrawide: 40, ultraAperture: "f/1.8", ultraSensor: 1/1.54, telephoto: 12, teleAperture: "f/3.4", teleSensor: 1/3.57, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.2" },
+  { name: "OnePlus 8 Pro", emoji: "🔴", color: "#2a0a0a", year: 2020, mainCam: 48, mainAperture: "f/1.78", mainSensor: 1/1.43, mainPixel: 1.1, mainDR: 13, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 8, teleAperture: "f/2.4", teleSensor: 1/3.6, tele2: null, tele2Aperture: null, frontCam: 16, frontAperture: "f/2.4" },
+  // 2021
+  { name: "Samsung Galaxy S21 Ultra", emoji: "📱", color: "#1a1a2e", year: 2021, mainCam: 108, mainAperture: "f/1.8", mainSensor: 1/1.33, mainPixel: 0.8, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.2, telephoto: 10, teleAperture: "f/4.9", teleSensor: 1/3.24, tele2: 10, tele2Aperture: "f/2.4", frontCam: 40, frontAperture: "f/2.2" },
+  { name: "iPhone 13 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2021, mainCam: 12, mainAperture: "f/1.5", mainSensor: 1/1.65, mainPixel: 1.9, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/1.8", ultraSensor: 1/3.4, telephoto: 12, teleAperture: "f/2.8", teleSensor: 1/3.5, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/2.2" },
+  { name: "Xiaomi Mi 11 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2021, mainCam: 50, mainAperture: "f/1.95", mainSensor: 1/1.12, mainPixel: 1.4, mainDR: 14, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 48, teleAperture: "f/4.1", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 20, frontAperture: "f/2.2" },
+  { name: "Oppo Find X3 Pro", emoji: "🟢", color: "#0a2a1a", year: 2021, mainCam: 50, mainAperture: "f/1.8", mainSensor: 1/1.56, mainPixel: 1.0, mainDR: 13, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/1.56, telephoto: 13, teleAperture: "f/3.0", teleSensor: 1/3.4, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Google Pixel 6 Pro", emoji: "🔵", color: "#1a1a3a", year: 2021, mainCam: 50, mainAperture: "f/1.85", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.9, telephoto: 48, teleAperture: "f/3.5", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 11.1, frontAperture: "f/2.2" },
+  { name: "Vivo X60 Pro+", emoji: "🔵", color: "#1a2a3a", year: 2021, mainCam: 50, mainAperture: "f/1.57", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 8, teleAperture: "f/3.4", teleSensor: 1/4.0, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Huawei P50 Pro", emoji: "🔴", color: "#2a0a0a", year: 2021, mainCam: 50, mainAperture: "f/1.8", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 13.5, ultrawide: 13, ultraAperture: "f/2.2", ultraSensor: 1/3.0, telephoto: 64, teleAperture: "f/3.5", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 13, frontAperture: "f/2.4" },
+  { name: "OnePlus 9 Pro", emoji: "🔴", color: "#2a0a0a", year: 2021, mainCam: 48, mainAperture: "f/1.8", mainSensor: 1/1.43, mainPixel: 1.1, mainDR: 13, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/1.56, telephoto: 8, teleAperture: "f/2.4", teleSensor: 1/3.6, tele2: null, tele2Aperture: null, frontCam: 16, frontAperture: "f/2.4" },
+  // 2022
+  { name: "Samsung Galaxy S22 Ultra", emoji: "📱", color: "#1a1a2e", year: 2022, mainCam: 108, mainAperture: "f/1.8", mainSensor: 1/1.33, mainPixel: 0.8, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.2, telephoto: 10, teleAperture: "f/4.9", teleSensor: 1/3.24, tele2: 10, tele2Aperture: "f/2.4", frontCam: 40, frontAperture: "f/2.2" },
+  { name: "iPhone 14 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2022, mainCam: 48, mainAperture: "f/1.78", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 12, teleAperture: "f/2.8", teleSensor: 1/3.5, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/1.9" },
+  { name: "Xiaomi 12S Ultra", emoji: "🟠", color: "#2a1a0a", year: 2022, mainCam: 50, mainAperture: "f/1.9", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 48, teleAperture: "f/4.1", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.0" },
+  { name: "Oppo Find X5 Pro", emoji: "🟢", color: "#0a2a1a", year: 2022, mainCam: 50, mainAperture: "f/1.7", mainSensor: 1/1.56, mainPixel: 1.0, mainDR: 13, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/1.56, telephoto: 13, teleAperture: "f/2.4", teleSensor: 1/3.4, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Google Pixel 7 Pro", emoji: "🔵", color: "#1a1a3a", year: 2022, mainCam: 50, mainAperture: "f/1.85", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.9, telephoto: 48, teleAperture: "f/3.5", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 10.8, frontAperture: "f/2.2" },
+  { name: "Vivo X80 Pro", emoji: "🔵", color: "#1a2a3a", year: 2022, mainCam: 50, mainAperture: "f/1.57", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 12, teleAperture: "f/3.4", teleSensor: 1/3.0, tele2: 8, tele2Aperture: "f/1.98", frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Huawei Mate 50 Pro", emoji: "🔴", color: "#2a0a0a", year: 2022, mainCam: 50, mainAperture: "f/1.4", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 13, ultraAperture: "f/2.2", ultraSensor: 1/3.0, telephoto: 64, teleAperture: "f/3.5", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 13, frontAperture: "f/2.4" },
+  { name: "OnePlus 10 Pro", emoji: "🔴", color: "#2a0a0a", year: 2022, mainCam: 48, mainAperture: "f/1.8", mainSensor: 1/1.43, mainPixel: 1.1, mainDR: 13, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/1.56, telephoto: 8, teleAperture: "f/2.4", teleSensor: 1/3.6, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  // 2023
+  { name: "Samsung Galaxy S23 Ultra", emoji: "📱", color: "#1a1a2e", year: 2023, mainCam: 200, mainAperture: "f/1.7", mainSensor: 1/1.3, mainPixel: 0.6, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 10, teleAperture: "f/4.9", teleSensor: 1/3.24, tele2: 10, tele2Aperture: "f/2.4", frontCam: 12, frontAperture: "f/2.2" },
+  { name: "iPhone 15 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2023, mainCam: 48, mainAperture: "f/1.78", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 12, teleAperture: "f/2.8", teleSensor: 1/3.0, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/1.9" },
+  { name: "Xiaomi 13 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2023, mainCam: 50, mainAperture: "f/1.9", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/1.8", ultraSensor: 1/2.2, telephoto: 50, teleAperture: "f/1.8", teleSensor: 1/2.5, tele2: 50, tele2Aperture: "f/3.0", frontCam: 32, frontAperture: "f/2.0" },
+  { name: "Oppo Find X6 Pro", emoji: "🟢", color: "#0a2a1a", year: 2023, mainCam: 50, mainAperture: "f/1.8", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/1.56, telephoto: 50, teleAperture: "f/2.6", teleSensor: 1/1.56, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Google Pixel 8 Pro", emoji: "🔵", color: "#1a1a3a", year: 2023, mainCam: 50, mainAperture: "f/1.68", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13.5, ultrawide: 48, ultraAperture: "f/1.95", ultraSensor: 1/2.55, telephoto: 48, teleAperture: "f/2.8", teleSensor: 1/2.55, tele2: null, tele2Aperture: null, frontCam: 10.5, frontAperture: "f/2.2" },
+  { name: "Vivo X90 Pro", emoji: "🔵", color: "#1a2a3a", year: 2023, mainCam: 50, mainAperture: "f/1.75", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14, ultrawide: 12, ultraAperture: "f/2.0", ultraSensor: 1/2.9, telephoto: 50, teleAperture: "f/1.6", teleSensor: 1/2.5, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Huawei P60 Pro", emoji: "🔴", color: "#2a0a0a", year: 2023, mainCam: 48, mainAperture: "f/1.4", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 13, ultraAperture: "f/2.2", ultraSensor: 1/3.0, telephoto: 48, teleAperture: "f/2.1", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 13, frontAperture: "f/2.4" },
+  { name: "OnePlus 11", emoji: "🔴", color: "#2a0a0a", year: 2023, mainCam: 50, mainAperture: "f/1.8", mainSensor: 1/1.56, mainPixel: 1.0, mainDR: 13, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 32, teleAperture: "f/2.0", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 16, frontAperture: "f/2.4" },
+  // 2024
+  { name: "Samsung Galaxy S24 Ultra", emoji: "📱", color: "#1a1a2e", year: 2024, mainCam: 200, mainAperture: "f/1.7", mainSensor: 1/1.3, mainPixel: 0.6, mainDR: 13.5, ultrawide: 12, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 50, teleAperture: "f/3.4", teleSensor: 1/2.52, tele2: 10, tele2Aperture: "f/2.4", frontCam: 12, frontAperture: "f/2.2" },
+  { name: "iPhone 16 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2024, mainCam: 48, mainAperture: "f/1.78", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 12, teleAperture: "f/2.8", teleSensor: 1/3.0, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/1.9" },
+  { name: "Xiaomi 14 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2024, mainCam: 50, mainAperture: "f/1.63", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/1.8", ultraSensor: 1/2.2, telephoto: 50, teleAperture: "f/1.8", teleSensor: 1/2.5, tele2: 50, tele2Aperture: "f/2.5", frontCam: 32, frontAperture: "f/2.0" },
+  { name: "Oppo Find X7 Ultra", emoji: "🟢", color: "#0a2a1a", year: 2024, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/1.95, telephoto: 50, teleAperture: "f/2.6", teleSensor: 1/1.56, tele2: 50, tele2Aperture: "f/4.3", frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Google Pixel 9 Pro XL", emoji: "🔵", color: "#1a1a3a", year: 2024, mainCam: 50, mainAperture: "f/1.68", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13.5, ultrawide: 48, ultraAperture: "f/1.7", ultraSensor: 1/2.55, telephoto: 48, teleAperture: "f/2.8", teleSensor: 1/2.55, tele2: null, tele2Aperture: null, frontCam: 42, frontAperture: "f/2.2" },
+  { name: "Vivo X100 Pro", emoji: "🔵", color: "#1a2a3a", year: 2024, mainCam: 50, mainAperture: "f/1.75", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/1.95, telephoto: 50, teleAperture: "f/2.5", teleSensor: 1/1.95, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Huawei Mate 70 Pro", emoji: "🔴", color: "#2a0a0a", year: 2024, mainCam: 50, mainAperture: "f/1.4", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14, ultrawide: 40, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 48, teleAperture: "f/2.1", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 13, frontAperture: "f/2.4" },
+  { name: "OnePlus 12", emoji: "🔴", color: "#2a0a0a", year: 2024, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1/1.4, mainPixel: 1.1, mainDR: 13.5, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.0, telephoto: 64, teleAperture: "f/2.6", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  // 2025
+  { name: "Samsung Galaxy S25 Ultra", emoji: "📱", color: "#1a1a2e", year: 2025, mainCam: 200, mainAperture: "f/1.7", mainSensor: 1/1.3, mainPixel: 0.6, mainDR: 13.5, ultrawide: 50, ultraAperture: "f/1.9", ultraSensor: 1/2.5, telephoto: 50, teleAperture: "f/3.4", teleSensor: 1/2.52, tele2: 10, tele2Aperture: "f/2.4", frontCam: 12, frontAperture: "f/2.2" },
+  { name: "Xiaomi 15 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2025, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/2.76, telephoto: 200, teleAperture: "f/2.6", teleSensor: 1/1.4, tele2: 50, tele2Aperture: "f/2.2", frontCam: 32, frontAperture: "f/2.0" },
+  { name: "Oppo Find X8 Ultra", emoji: "🟢", color: "#0a2a1a", year: 2025, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14.5, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/1.95, telephoto: 50, teleAperture: "f/2.6", teleSensor: 1/1.56, tele2: 50, tele2Aperture: "f/4.3", frontCam: 32, frontAperture: "f/2.4" },
+  { name: "Google Pixel 10 Pro XL", emoji: "🔵", color: "#1a1a3a", year: 2025, mainCam: 50, mainAperture: "f/1.68", mainSensor: 1/1.31, mainPixel: 1.2, mainDR: 13.5, ultrawide: 48, ultraAperture: "f/1.7", ultraSensor: 1/2.55, telephoto: 48, teleAperture: "f/2.8", teleSensor: 1/2.55, tele2: null, tele2Aperture: null, frontCam: 42, frontAperture: "f/2.2" },
+  { name: "Vivo X200 Pro", emoji: "🔵", color: "#1a2a3a", year: 2025, mainCam: 50, mainAperture: "f/1.57", mainSensor: 1.0, mainPixel: 1.6, mainDR: 14, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/1.95, telephoto: 200, teleAperture: "f/2.67", teleSensor: 1/1.4, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  { name: "OnePlus 13", emoji: "🔴", color: "#2a0a0a", year: 2025, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1/1.4, mainPixel: 1.1, mainDR: 13.5, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/2.0, telephoto: 50, teleAperture: "f/2.6", teleSensor: 1/2.0, tele2: null, tele2Aperture: null, frontCam: 32, frontAperture: "f/2.4" },
+  // 2026
+  { name: "Samsung Galaxy S26 Ultra", emoji: "📱", color: "#1a1a2e", year: 2026, mainCam: 200, mainAperture: "f/1.4", mainSensor: 1/1.3, mainPixel: 0.6, mainDR: 14, ultrawide: 50, ultraAperture: "f/1.9", ultraSensor: 1/2.5, telephoto: 50, teleAperture: "f/2.9", teleSensor: 1/2.52, tele2: 10, tele2Aperture: "f/2.4", frontCam: 12, frontAperture: "f/2.2" },
+  { name: "iPhone 18 Pro Max", emoji: "🍎", color: "#2a2a2a", year: 2026, mainCam: 48, mainAperture: "f/1.48", mainSensor: 1/1.28, mainPixel: 1.2, mainDR: 14.5, ultrawide: 48, ultraAperture: "f/2.2", ultraSensor: 1/2.55, telephoto: 48, teleAperture: "f/2.8", teleSensor: 1/2.8, tele2: null, tele2Aperture: null, frontCam: 18, frontAperture: "f/1.9" },
+  { name: "Xiaomi 17 Ultra", emoji: "🟠", color: "#2a1a0a", year: 2026, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1.0, mainPixel: 1.6, mainDR: 18, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/2.76, ultraPixel: 0.64, ultraDR: 14.68, telephoto: 200, teleAperture: "f/2.6", teleSensor: 1/1.4, teleDR: 17.5, tele2: null, tele2Aperture: null, frontCam: 50, frontAperture: "f/2.0", frontSensor: 1/2.88, frontPixel: 0.61, frontFWC: 1300 },
+  { name: "Oppo Find X9 Ultra", emoji: "🟢", color: "#0a2a1a", year: 2026, mainCam: 200, mainAperture: "f/1.5", mainSensor: 1/1.12, mainPixel: 0.7, mainDR: 17, ultrawide: 50, ultraAperture: "f/2.0", ultraSensor: 1/1.95, ultraPixel: 0.8, telephoto: 200, teleAperture: "f/2.2", teleSensor: 1/1.28, tele2: 50, tele2Aperture: "f/3.5", tele2Sensor: 1/2.75, tele2Pixel: 0.64, tele2DR: 12.06, frontCam: 50, frontAperture: "f/2.4", frontSensor: 1/2.75, frontPixel: 0.64, frontDR: 14.68 },
+  { name: "Google Pixel 11 Pro XL", emoji: "🔵", color: "#1a1a3a", year: 2026, mainCam: 50, mainAperture: "f/1.6", mainSensor: 1/1.3, mainPixel: 1.2, mainDR: 14, ultrawide: 48, ultraAperture: "f/1.9", ultraSensor: 1/2.0, telephoto: 48, teleAperture: "f/2.8", teleSensor: 1/2.55, tele2: null, tele2Aperture: null, frontCam: 12, frontAperture: "f/2.2" },
+  { name: "Red Magic 11 Pro", emoji: "🔴", color: "#2a0a0a", year: 2026, mainCam: 50, mainAperture: "f/1.7", mainSensor: 1/1.5, mainPixel: 1.0, mainDR: 13, ultrawide: 50, ultraAperture: "f/2.2", ultraSensor: 1/2.76, ultraPixel: 0.612, telephoto: null, teleAperture: null, teleSensor: null, tele2: null, tele2Aperture: null, frontCam: 16, frontAperture: "f/2.0", frontPixel: 1.0 },
+  { name: "Nothing Phone (3a) Pro", emoji: "⬜", color: "#111111", year: 2025, dev: true, mainCam: 50, mainAperture: "f/1.9", mainSensor: 1/1.56, mainPixel: 1.0, mainDR: 13, ultrawide: 8, ultraAperture: "f/2.2", ultraSensor: 1/4.0, telephoto: 50, teleAperture: "f/2.6", teleSensor: 1/1.95, tele2: null, tele2Aperture: null, frontCam: 50, frontAperture: "f/2.2", frontSensor: 1/2.76, frontPixel: 0.64 },
+  { name: "Huawei Mate 20 Pro", emoji: "🔴", color: "#2a0a0a", year: 2018, dev: true, mainCam: 40, mainAperture: "f/1.8", mainSensor: 1/1.7, mainPixel: 1.0, mainDR: 13, ultrawide: 20, ultraAperture: "f/2.2", ultraSensor: 1/2.7, telephoto: 8, teleAperture: "f/2.4", teleSensor: 1/4.0, tele2: null, tele2Aperture: null, frontCam: 24, frontAperture: "f/2.0" },
+];
+
+PHONES.sort((a, b) => (a.year - b.year) || a.name.localeCompare(b.name, 'ru'));
+
+// Названия чипов сенсоров (где известны). Остальным '—'.
+const CHIPS = {
+  "Samsung Galaxy S20 Ultra": { main: "ISOCELL HM1", tele: "Sony IMX586" },
+  "Samsung Galaxy S21 Ultra": { main: "ISOCELL HM3" },
+  "Samsung Galaxy S22 Ultra": { main: "ISOCELL HM3", tele: "Sony IMX754" },
+  "Samsung Galaxy S23 Ultra": { main: "ISOCELL HP2" },
+  "Samsung Galaxy S24 Ultra": { main: "ISOCELL HP2" },
+  "Samsung Galaxy S25 Ultra": { main: "ISOCELL HP2", tele: "Sony IMX854" },
+  "Samsung Galaxy S26 Ultra": { main: "ISOCELL HP2" },
+  "iPhone 12 Pro Max": { main: "Sony (custom)" },
+  "iPhone 13 Pro Max": { main: "Sony (custom)" },
+  "iPhone 14 Pro Max": { main: "Sony (custom)" },
+  "iPhone 15 Pro Max": { main: "Sony (custom)" },
+  "iPhone 16 Pro Max": { main: "Sony (custom)" },
+  "iPhone 18 Pro Max": { main: "Sony (custom)" },
+  "Xiaomi Mi 11 Ultra": { main: "ISOCELL GN2" },
+  "Xiaomi 12S Ultra": { main: "Sony IMX989" },
+  "Xiaomi 13 Ultra": { main: "Sony IMX989", ultra: "Sony IMX858", tele: "Sony IMX858", tele2: "Sony IMX858" },
+  "Xiaomi 14 Ultra": { main: "Sony IMX989", ultra: "Sony IMX858", tele: "Sony IMX858", tele2: "Sony IMX858" },
+  "Xiaomi 15 Ultra": { main: "Sony LYT-900" },
+  "Xiaomi 17 Ultra": { main: "OmniVision OV50X (Light Fusion 1050L)", tele: "Samsung ISOCELL HPE", ultra: "Samsung ISOCELL JN5", front: "OmniVision OV50M", frontFWC: 1300 },
+  "Google Pixel 6 Pro": { main: "ISOCELL GN1", tele: "Sony IMX586" },
+  "Google Pixel 7 Pro": { main: "ISOCELL GN1", tele: "Sony IMX586" },
+  "Google Pixel 8 Pro": { main: "ISOCELL GN2" },
+  "Google Pixel 9 Pro XL": { main: "ISOCELL GN2", ultra: "Sony IMX858", tele: "Sony IMX858" },
+  "Google Pixel 10 Pro XL": { main: "ISOCELL GN2", ultra: "Sony IMX858", tele: "Sony IMX858" },
+  "Google Pixel 11 Pro XL": { main: "ISOCELL GN2", ultra: "Sony IMX858", tele: "Sony IMX858" },
+  "OnePlus 8 Pro": { main: "Sony IMX689", ultra: "Sony IMX586" },
+  "OnePlus 9 Pro": { main: "Sony IMX789", ultra: "Sony IMX766" },
+  "OnePlus 10 Pro": { main: "Sony IMX789" },
+  "OnePlus 11": { main: "Sony IMX890" },
+  "OnePlus 12": { main: "Sony LYT-808" },
+  "OnePlus 13": { main: "Sony LYT-808" },
+  "Huawei P40 Pro": { main: "Sony IMX700 (RYYB)" },
+  "Huawei Mate 40 Pro": { main: "Sony IMX700 (RYYB)" },
+  "Huawei P50 Pro": { main: "Sony IMX766 (RYYB)" },
+  "Huawei Mate 50 Pro": { main: "Sony IMX766 (RYYB)" },
+  "Huawei P60 Pro": { main: "Sony IMX888 (RYYB)" },
+  "Huawei Mate 60 Pro": { main: "Sony IMX989 (RYYB)" },
+  "Huawei Mate 70 Pro": { main: "Sony IMX989 (RYYB)" },
+  "Oppo Find X2 Pro": { main: "Sony IMX689" },
+  "Oppo Find X3 Pro": { main: "Sony IMX766", ultra: "Sony IMX766" },
+  "Oppo Find X5 Pro": { main: "Sony IMX766", ultra: "Sony IMX766" },
+  "Oppo Find X6 Pro": { main: "Sony IMX989", ultra: "Sony IMX890" },
+  "Oppo Find X7 Ultra": { main: "Sony LYT-900", ultra: "Sony LYT-600" },
+  "Oppo Find X8 Ultra": { main: "Sony LYT-900", ultra: "Sony LYT-600" },
+  "Oppo Find X9 Ultra": { main: "Sony LYT-901 (IMX09E)", ultra: "Sony LYT-600", tele: "OmniVision OV52A", tele2: "Samsung ISOCELL JNL", tele2FWC: 6000, tele2ReadNoise: 1.4, front: "Samsung ISOCELL JN5", frontFWC: 9000, frontReadNoise: 1.4 },
+  "Vivo X50 Pro": { main: "Samsung ISOCELL GN1" },
+  "Vivo X60 Pro+": { main: "Samsung ISOCELL GN1", ultra: "Sony IMX598" },
+  "Vivo X70 Pro+": { main: "Samsung ISOCELL GN1" },
+  "Vivo X80 Pro": { main: "Samsung ISOCELL GN1" },
+  "Vivo X90 Pro": { main: "Sony IMX989" },
+  "Vivo X100 Pro": { main: "Sony LYT-900" },
+  "Vivo X200 Pro": { main: "Sony LYT-818" },
+  "Red Magic 11 Pro": { main: "OmniVision OV50E40", ultra: "OmniVision OV50D40", front: "OmniVision OV16A" },
+  "Nothing Phone (3a) Pro": { main: "Samsung ISOCELL GNJ", ultra: "Sony IMX355", tele: "Sony LYT-600", front: "Samsung ISOCELL JN1" },
+  "Huawei Mate 20 Pro": { main: "Sony IMX600 (RYYB)", ultra: "Sony IMX351", tele: "OmniVision OV08A10", front: "Sony IMX576" },
+};
+function chip(p, key) { return (CHIPS[p.name] && CHIPS[p.name][key]) || '—'; }
+function fwcVal(p, key, computed) {
+  const c = CHIPS[p.name];
+  const k = key + 'FWC';
+  if (c && c[k]) return c[k];
+  return computed;
+}
+function readNoise(fwc) {
+  if (!fwc) return null;
+  return Math.max(1, Math.round(fwc / 4000));
+}
+
+function block(title, rows) {
+  let html = `<div class="cam-block"><div class="cam-title">${title}</div>`;
+  rows.forEach(([k, v]) => {
+    html += `<div class="cam-row"><span class="cam-key">${k}</span><span class="cam-val">${v}</span></div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function brandDomain(name) {
+  const n = name.toLowerCase();
+  if (n.startsWith('samsung')) return 'samsung.com';
+  if (n.startsWith('iphone')) return 'apple.com';
+  if (n.startsWith('xiaomi')) return 'mi.com';
+  if (n.startsWith('oppo')) return 'oppo.com';
+  if (n.startsWith('vivo')) return 'vivo.com';
+  if (n.startsWith('google pixel')) return 'google.com';
+  if (n.startsWith('oneplus')) return 'oneplus.com';
+  if (n.startsWith('huawei')) return 'huawei.com';
+  if (n.startsWith('nothing')) return 'nothing.tech';
+  if (n.startsWith('red magic')) return 'redmagic.gg';
+  return '';
+}
+function logoUrl(name) {
+  const d = brandDomain(name);
+  return d ? 'https://www.google.com/s2/favicons?domain=' + d + '&sz=128' : '';
+}
+
+function renderPhone(p) {
+  const card = document.createElement('div');
+  card.className = 'phone-card';
+  let details = '';
+  // Main
+  details += block('ОСНОВНАЯ КАМЕРА', [
+    ['Чип сенсора', chip(p, 'main')],
+    ['Мп', p.mainCam + ' Мп'],
+    ['Диафрагма', p.mainAperture],
+    ['Сенсор', sensorFmt(p.mainSensor)],
+    ['Пиксель', p.mainPixel + ' µm'],
+    ['ФВЦ', (fwcVal(p, 'main', p.mainPixel ? Math.round(p.mainPixel * 10000) : null) || '—') + ' e⁻'],
+    ['Рид-нойз (read noise)', (readNoise(fwcVal(p, 'main', p.mainPixel ? Math.round(p.mainPixel * 10000) : null)) || '—') + ' e⁻ (≈)'],
+    ['Фокусное расст.', '≈24 мм'],
+    ['Мин. дистанция фокуса', '≈8 см'],
+    ['ДД', (p.name === 'Xiaomi 17 Ultra' ? '18 стоп (110 дБ, LOFIC)' : p.mainDR + ' стоп')]
+  ]);
+  // Ultrawide
+  details += block('УЛЬТРАШИРОКОУГОЛЬНАЯ', [
+    ['Чип сенсора', chip(p, 'ultra')],
+    ['Мп', p.ultrawide + ' Мп'],
+    ['Диафрагма', p.ultraAperture],
+    ['Сенсор', sensorFmt(p.ultraSensor)],
+    ['Пиксель', (p.ultraPixel ? p.ultraPixel + ' µm' : (pixelSizeUm(p.ultraSensor, p.ultrawide) || '—') + ' µm (≈)')],
+    ['ФВЦ', (function(){ var c = p.ultraPixel ? Math.round(p.ultraPixel*10000) : fwcFromPx(pixelSizeUm(p.ultraSensor, p.ultrawide)); var v=fwcVal(p,'ultra',c); if(!v) return '—'; var suf=(CHIPS[p.name]&&CHIPS[p.name].ultraFWC)?'':' (≈)'; return v+' e⁻'+suf; })()],
+    ['Рид-нойз (read noise)', (function(){ var c = p.ultraPixel ? Math.round(p.ultraPixel*10000) : fwcFromPx(pixelSizeUm(p.ultraSensor, p.ultrawide)); var v=fwcVal(p,'ultra',c); var rn=readNoise(v); if(!rn) return '—'; var suf=(CHIPS[p.name]&&CHIPS[p.name].ultraFWC)?'':' (≈)'; return rn+' e⁻'+suf; })()],
+    ['Фокусное расст.', '≈13 мм'],
+    ['Мин. дистанция фокуса', '≈3 см (макро)'],
+    ['ДД', (p.ultraDR ? p.ultraDR + ' стоп' : (estDR(pixelSizeUm(p.ultraSensor, p.ultrawide)) || '—') + ' стоп (≈)')]
+  ]);
+  // Telephoto
+  if (p.telephoto) {
+    details += block('ТЕЛЕФОТО', [
+      ['Чип сенсора', chip(p, 'tele')],
+      ['Мп', p.telephoto + ' Мп'],
+      ['Диафрагма', p.teleAperture],
+      ['Сенсор', sensorFmt(p.teleSensor)],
+      ['Пиксель', (pixelSizeUm(p.teleSensor, p.telephoto) || '—') + ' µm (≈)'],
+      ['ФВЦ', (function(){ var c=fwcFromPx(pixelSizeUm(p.teleSensor, p.telephoto)); var v=fwcVal(p,'tele',c); if(!v) return '—'; var suf=(CHIPS[p.name]&&CHIPS[p.name].teleFWC)?'':' (≈)'; return v+' e⁻'+suf; })()],
+      ['Рид-нойз (read noise)', (function(){ var c=fwcFromPx(pixelSizeUm(p.teleSensor, p.telephoto)); var v=fwcVal(p,'tele',c); var rn=readNoise(v); if(!rn) return '—'; var suf=(CHIPS[p.name]&&CHIPS[p.name].teleFWC)?'':' (≈)'; return rn+' e⁻'+suf; })()],
+      ['Фокусное расст.', '≈70 мм'],
+      ['Мин. дистанция фокуса', '≈15 см'],
+      ['ДД', (p.teleDR ? p.teleDR + ' стоп' : (estDR(pixelSizeUm(p.teleSensor, p.telephoto)) || '—') + ' стоп (≈)')]
+    ]);
+  } else {
+    details += block('ТЕЛЕФОТО', [['—', 'нет']]);
+  }
+  // Tele2 / periscope
+  if (p.tele2) {
+    details += block('ПЕРИСКОП (2-Й ТЕЛЕФОТО)', [
+      ['Чип сенсора', chip(p, 'tele2')],
+      ['Мп', p.tele2 + ' Мп'],
+      ['Диафрагма', p.tele2Aperture],
+      ['Сенсор', p.tele2Sensor ? sensorFmt(p.tele2Sensor) : '—'],
+      ['Пиксель', p.tele2Pixel ? p.tele2Pixel + ' µm' : '—'],
+      ['ФВЦ', (function(){ var c = p.tele2Pixel ? Math.round(p.tele2Pixel*10000) : null; var v = fwcVal(p,'tele2',c); if(!v) return '—'; var suf = (CHIPS[p.name]&&CHIPS[p.name].tele2FWC)?'':' (≈)'; return v+' e⁻'+suf; })()],
+      ['Рид-нойз (read noise)', (function(){ var c = p.tele2Pixel ? Math.round(p.tele2Pixel*10000) : null; var v = fwcVal(p,'tele2',c); var rn = readNoise(v); if(!rn) return '—'; var suf = (CHIPS[p.name]&&CHIPS[p.name].tele2ReadNoise)?'':' (≈)'; return rn+' e⁻'+suf; })()],
+      ['Фокусное расст.', '≈120 мм'],
+      ['Мин. дистанция фокуса', '≈20 см'],
+      ['ДД', p.tele2DR ? p.tele2DR + ' стоп' : '—']
+    ]);
+  }
+  // Front
+  details += block('ФРОНТАЛЬНАЯ', [
+    ['Чип сенсора', chip(p, 'front')],
+    ['Мп', p.frontCam + ' Мп'],
+    ['Диафрагма', p.frontAperture],
+    ['Сенсор', p.frontSensor ? sensorFmt(p.frontSensor) : '—'],
+    ['Пиксель', p.frontPixel ? p.frontPixel + ' µm' : '—'],
+    ['ФВЦ', (function(){ var c = p.frontPixel ? Math.round(p.frontPixel*10000) : null; var v = fwcVal(p,'front',c); if(!v) return '—'; var suf = (CHIPS[p.name]&&CHIPS[p.name].frontFWC)?'':' (≈)'; return v+' e⁻'+suf; })()],
+    ['Рид-нойз (read noise)', (function(){ var c = p.frontPixel ? Math.round(p.frontPixel*10000) : null; var v = fwcVal(p,'front',c); var rn = readNoise(v); if(!rn) return '—'; var suf = (CHIPS[p.name]&&CHIPS[p.name].frontFWC)?'':' (≈)'; return rn+' e⁻'+suf; })()],
+    ['Фокусное расст.', '≈23 мм'],
+    ['ДД', p.frontDR ? p.frontDR + ' стоп' : '—']
+  ]);
+
+  const _logo = logoUrl(p.name);
+  const _logoHtml = _logo
+    ? `<img class="phone-logo" src="${_logo}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="phone-emoji" style="display:none">${p.emoji}</span>`
+    : `<span class="phone-emoji">${p.emoji}</span>`;
+  card.innerHTML = `
+    <div class="phone-head">
+      ${_logoHtml}
+      <span class="phone-name">${p.name}</span>
+      <span class="phone-arrow">▶</span>
+    </div>
+    <div class="phone-details">${details}</div>
+  `;
+  card.querySelector('.phone-head').onclick = () => card.classList.toggle('open');
+  return card;
+}
+
+function render(filter) {
+  const list = $('list');
+  list.innerHTML = '';
+  const q = (filter || '').toLowerCase();
+  let count = 0;
+
+  // Телефоны разработчика — отдельный блок
+  const devPhones = PHONES.filter(p => p.dev && (!q || p.name.toLowerCase().includes(q)));
+  if (devPhones.length) {
+    const yg = document.createElement('div');
+    yg.className = 'year-group';
+    yg.textContent = 'Телефоны разработчика';
+    list.appendChild(yg);
+    devPhones.forEach(p => { list.appendChild(renderPhone(p)); count++; });
+  }
+
+  // Остальные — по годам
+  let lastYear = null;
+  PHONES.filter(p => !p.dev).forEach(p => {
+    if (q && !p.name.toLowerCase().includes(q)) return;
+    if (p.year !== lastYear) {
+      lastYear = p.year;
+      const yg = document.createElement('div');
+      yg.className = 'year-group';
+      yg.textContent = p.year;
+      list.appendChild(yg);
+    }
+    list.appendChild(renderPhone(p));
+    count++;
+  });
+
+  if (count === 0) {
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = 'Ничего не найдено';
+    list.appendChild(e);
+  }
+}
+
+function $(id) { return document.getElementById(id); }
+$('search').addEventListener('input', e => render(e.target.value));
+render();
+</script>
+</body>
+</html>
